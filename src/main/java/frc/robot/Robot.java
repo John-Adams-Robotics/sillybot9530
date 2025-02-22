@@ -93,10 +93,10 @@ public class Robot extends TimedRobot {
     DifferentialDriveWheelSpeeds var_wheelspeeds; //wheel speeds from kinematics
 
     //axis transformations, consume and perform kinematics math using transformed axis data
-    var_xaxis = -MathUtil.applyDeadband(ctrl_driver.getLeftY(), cnst_ctrldeadband) * (var_throttle*var_throttle); //use throttle to limit speed for finer control
+    var_xaxis = -MathUtil.applyDeadband(ctrl_driver.getLeftY(), cnst_ctrldeadband) * MathUtil.clamp((var_throttle*var_throttle), 0.4, 1); //use throttle to limit speed for finer control
     var_zaxis = -MathUtil.applyDeadband(ctrl_driver.getLeftX(), cnst_ctrldeadband);
     var_throttle = 1 - MathUtil.applyDeadband(ctrl_driver.getRightTriggerAxis(), cnst_ctrldeadband); //subtract axis data from axis maximum to invert scale of axis
-    var_wheelspeeds = obj_kinematics.toWheelSpeeds(new ChassisSpeeds(var_xaxis, 0, var_zaxis));
+    var_wheelspeeds = obj_kinematics.toWheelSpeeds(new ChassisSpeeds(var_xaxis , 0, var_zaxis));
 
     //bools for shooter operations
     var_driver_a = ctrl_driver.getAButton();
@@ -110,11 +110,14 @@ public class Robot extends TimedRobot {
       var_shootspeed = 0;
     }
 
-    //write speeds to motors
+    //write speeds to motors for drive
+
     m_frontleft.set(-var_wheelspeeds.leftMetersPerSecond);
     m_backleft.set(-var_wheelspeeds.leftMetersPerSecond);
     m_frontright.set(var_wheelspeeds.rightMetersPerSecond);
     m_backright.set(var_wheelspeeds.rightMetersPerSecond);
+   
+    //write speeds to shooter
     m_shooter.set(var_shootspeed);
   }
 
