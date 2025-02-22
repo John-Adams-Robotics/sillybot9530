@@ -32,7 +32,6 @@ public class Robot extends TimedRobot {
 
   //controller instances
   private final XboxController ctrl_driver;
-  private final XboxController ctrl_operator;
 
   //kinematics instance
   private final DifferentialDriveKinematics obj_kinematics;
@@ -64,7 +63,6 @@ public class Robot extends TimedRobot {
 
     //controller params, adjust ports as needed
     ctrl_driver = new XboxController(0);
-    ctrl_operator = new XboxController(1);
 
     //kinematic params
     obj_kinematics = new DifferentialDriveKinematics(cnst_trackwidth);
