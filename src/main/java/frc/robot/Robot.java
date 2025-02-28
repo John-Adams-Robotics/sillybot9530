@@ -12,7 +12,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -38,7 +40,7 @@ public class Robot extends TimedRobot {
 
   //class-level constants
   private static final double cnst_trackwidth = Units.inchesToMeters(22.5); //width between centers of drivetrain wheels
-  private static final double cnst_ctrldeadband = 0.1; //deadband for controller axis data
+  private static final double cnst_ctrldeadband = 0.25; //deadband for controller axis data
 
   //class-level variables for drive
   private double var_xaxis; //axis generated from transformed controller data
@@ -46,19 +48,25 @@ public class Robot extends TimedRobot {
   private double var_throttle; //axis generated from transformed controller data, used to limit X axis speed
   private boolean var_driver_a; //button state for shooter
   private boolean var_driver_b; //button state for shooter
+  public double startTime; // start time for the robot in auto
+  public double time;// variable to keep track of time for autonomous
+  public double timeAfter; // this is the time minus the start of autonmous
+ 
   
 
 
   //class-level variables for outtake
   private double var_shootspeed; //shooter speed variable
 
+  // encoders
+  public Encoder e_leftFront = new Encoder(0,1);
   public Robot() {
 
     //declare motor params, adjust node IDs as needed
     m_frontleft = new SparkMax(14, MotorType.kBrushed);
     m_backleft = new SparkMax(18, MotorType.kBrushed);
     m_frontright = new SparkMax(9, MotorType.kBrushed);
-    m_backright = new SparkMax(5, MotorType.kBrushed);
+    m_backright = new SparkMax(2, MotorType.kBrushed);
     m_shooter = new SparkMax(10, MotorType.kBrushed);
 
     //controller params, adjust ports as needed
@@ -66,6 +74,7 @@ public class Robot extends TimedRobot {
 
     //kinematic params
     obj_kinematics = new DifferentialDriveKinematics(cnst_trackwidth);
+    
   }
 
   @Override
@@ -77,13 +86,34 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("throttle", var_throttle);
     SmartDashboard.putBoolean("operator a button", var_driver_a);
     SmartDashboard.putBoolean("operator b button", var_driver_b);
+    SmartDashboard.putNumber("startTime", startTime);
+    SmartDashboard.putNumber("time", Timer.getFPGATimestamp());
+    SmartDashboard.putNumber("timeAfter", timeAfter);
   }
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    startTime = Timer.getFPGATimestamp(); // set time at auto start
+  }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    double time = Timer.getFPGATimestamp();
+    double timeAfter = time - startTime;
+    if (timeAfter < 5) {
+      m_frontleft.set(-0.2);
+      m_backleft.set(-0.2);
+      m_frontright.set(0.2);
+      m_backright.set(0.2);
+    }
+    else {
+      m_frontleft.set(0);
+      m_backleft.set(0);
+      m_frontright.set(0);
+      m_backright.set(0);
+    }
+    }
+  
 
   @Override
   public void teleopInit() {}
