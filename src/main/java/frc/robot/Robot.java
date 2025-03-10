@@ -48,9 +48,11 @@ public class Robot extends TimedRobot {
   private double var_throttle; //axis generated from transformed controller data, used to limit X axis speed
   private boolean var_driver_a; //button state for shooter
   private boolean var_driver_b; //button state for shooter
+  private boolean var_driver_left_shoulder; // button for a brake /* this is a break thingy*/
   public double startTime; // start time for the robot in auto
   public double time;// variable to keep track of time for autonomous
   public double timeAfter; // this is the time minus the start of autonmous
+  public double distance_test; // REMOVE THIS LATER *********************
  
   
 
@@ -89,7 +91,10 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("startTime", startTime);
     SmartDashboard.putNumber("time", Timer.getFPGATimestamp());
     SmartDashboard.putNumber("timeAfter", timeAfter);
-  }
+    SmartDashboard.putBoolean("brrrrreak", var_driver_left_shoulder);
+    SmartDashboard.putString("gey", ":3");
+    SmartDashboard.putNumber("distance test", e_leftFront.getDistance());
+    }
 
   @Override
   public void autonomousInit() {
@@ -100,18 +105,22 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {
     double time = Timer.getFPGATimestamp();
     double timeAfter = time - startTime;
-    if (timeAfter < 5) {
+    if (timeAfter < 8) {
       m_frontleft.set(-0.2);
       m_backleft.set(-0.2);
       m_frontright.set(0.2);
       m_backright.set(0.2);
     }
-    else {
+    else if (timeAfter < 10){
       m_frontleft.set(0);
       m_backleft.set(0);
       m_frontright.set(0);
       m_backright.set(0);
-    }
+      m_shooter.set(0.4);
+        }
+   else {
+          m_shooter.set(0);
+        }
     }
   
 
@@ -121,6 +130,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     DifferentialDriveWheelSpeeds var_wheelspeeds; //wheel speeds from kinematics
+
+    //break check
+    var_driver_left_shoulder = ctrl_driver.getLeftBumperButton();
 
     //axis transformations, consume and perform kinematics math using transformed axis data
     var_xaxis = -MathUtil.applyDeadband(ctrl_driver.getLeftY(), cnst_ctrldeadband) * MathUtil.clamp((var_throttle*var_throttle), 0.4, 1); //use throttle to limit speed for finer control
@@ -141,14 +153,23 @@ public class Robot extends TimedRobot {
     }
 
     //write speeds to motors for drive
-
+    if (var_driver_left_shoulder == false) {
     m_frontleft.set(-var_wheelspeeds.leftMetersPerSecond);
     m_backleft.set(-var_wheelspeeds.leftMetersPerSecond);
     m_frontright.set(var_wheelspeeds.rightMetersPerSecond);
     m_backright.set(var_wheelspeeds.rightMetersPerSecond);
-   
+    }
+    else if (var_driver_left_shoulder == true) {
+      m_frontleft.set(0);
+      m_backleft.set(0);
+      m_frontright.set(0);
+      m_backright.set(0);
+    }
+    
     //write speeds to shooter
     m_shooter.set(var_shootspeed);
+
+
   }
 
   @Override
