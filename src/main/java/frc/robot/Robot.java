@@ -12,7 +12,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
@@ -54,10 +53,7 @@ public class Robot extends TimedRobot {
   public double time;// variable to keep track of time for autonomous
   public double timeAfter; // this is the time minus the start of autonmous
   public double distance_test; // REMOVE THIS LATER *********************
-
-
-  // encoders
-  public Encoder e_leftFront = new Encoder(0,1);
+  
   public Robot() {
 
     //declare motor params, adjust node IDs as needed
@@ -89,7 +85,6 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("timeAfter", timeAfter);
     SmartDashboard.putBoolean("brrrrreak", var_driver_left_shoulder);
     SmartDashboard.putString("gey", ":3");
-    SmartDashboard.putNumber("distance test", e_leftFront.getDistance());
     }
 
   @Override
@@ -112,10 +107,10 @@ public class Robot extends TimedRobot {
       m_backleft.set(0);
       m_frontright.set(0);
       m_backright.set(0);
-// ALESDHLKJDFLKSDJHSDLKJHFLSKJDFH FIX THIS AND PUT SHOOTER HERRRRRRE
+      Shooter.manual_shoot(0.5);
         }
    else {
-        // ANNNNNNNND HERE
+        Shooter.manual_shoot(0);
         }
     }
   

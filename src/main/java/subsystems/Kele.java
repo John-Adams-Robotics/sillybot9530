@@ -40,6 +40,10 @@ public class Kele extends SubsystemBase {
      //write speeds to shooter
      m_shooter.set(var_shootspeed);
   }
+
+  public void manual_shoot(double speed) {
+    m_shooter.set(speed);
+  }
   @Override
   public void periodic() {
     
