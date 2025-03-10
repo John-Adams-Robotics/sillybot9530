@@ -4,19 +4,12 @@
 
 package frc.robot;
 
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
-import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import subsystems.Kele;
+import subsystems.Drive;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -26,48 +19,27 @@ import subsystems.Kele;
 public class Robot extends TimedRobot {
   // shooter
   Kele Shooter = new Kele(); 
-  //motor instances
-  private final SparkMax m_frontleft;
-  private final SparkMax m_backleft;
-  private final SparkMax m_frontright;
-  private final SparkMax m_backright;
+
+  // drive
+  Drive sillydrive = new Drive();
 
   //controller instances
   private final XboxController ctrl_driver;
 
-  //kinematics instance
-  private final DifferentialDriveKinematics obj_kinematics;
+// variables for controller
+private boolean var_driver_a; //button state for shooter
+private boolean var_driver_b; //button state for shooter
+private double var_driver_x_axis; // right stick x axis
+private double var_driver_y_axis; // right stick y axis
+private boolean var_driver_left_bumper; // left bumper
+private double var_driver_right_trigger; //right trigger
 
-  //class-level constants
-  private static final double cnst_trackwidth = Units.inchesToMeters(22.5); //width between centers of drivetrain wheels
-  private static final double cnst_ctrldeadband = 0.25; //deadband for controller axis data
-
-  //class-level variables for drive
-  private double var_xaxis; //axis generated from transformed controller data
-  private double var_zaxis; //axis generated from transformed controller data
-  private double var_throttle; //axis generated from transformed controller data, used to limit X axis speed
-  private boolean var_driver_a; //button state for shooter
-  private boolean var_driver_b; //button state for shooter
-  private boolean var_driver_left_shoulder; // button for a brake /* this is a break thingy*/
-  public double startTime; // start time for the robot in auto
-  public double time;// variable to keep track of time for autonomous
-  public double timeAfter; // this is the time minus the start of autonmous
-  public double distance_test; // REMOVE THIS LATER *********************
-  
+// variables for time
+public double startTime;
+double time;
   public Robot() {
-
-    //declare motor params, adjust node IDs as needed
-    m_frontleft = new SparkMax(14, MotorType.kBrushed);
-    m_backleft = new SparkMax(18, MotorType.kBrushed);
-    m_frontright = new SparkMax(9, MotorType.kBrushed);
-    m_backright = new SparkMax(2, MotorType.kBrushed);
-
-
     //controller params, adjust ports as needed
     ctrl_driver = new XboxController(0);
-
-    //kinematic params
-    obj_kinematics = new DifferentialDriveKinematics(cnst_trackwidth);
     
   }
 
@@ -75,15 +47,9 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
 
     //telemetry
-    SmartDashboard.putNumber("x axis", var_xaxis);
-    SmartDashboard.putNumber("z axis", var_zaxis);
-    SmartDashboard.putNumber("throttle", var_throttle);
     SmartDashboard.putBoolean("operator a button", var_driver_a);
     SmartDashboard.putBoolean("operator b button", var_driver_b);
-    SmartDashboard.putNumber("startTime", startTime);
     SmartDashboard.putNumber("time", Timer.getFPGATimestamp());
-    SmartDashboard.putNumber("timeAfter", timeAfter);
-    SmartDashboard.putBoolean("brrrrreak", var_driver_left_shoulder);
     SmartDashboard.putString("gey", ":3");
     }
 
@@ -94,24 +60,22 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    double time = Timer.getFPGATimestamp();
-    double timeAfter = time - startTime;
+    time = Timer.getFPGATimestamp();
+    double timeAfter = time - startTime; // FIX THIS LATER
     if (timeAfter < 8) {
-      m_frontleft.set(-0.2);
-      m_backleft.set(-0.2);
-      m_frontright.set(0.2);
-      m_backright.set(0.2);
+      sillydrive.manual_drive(0.2, 0.2);
     }
-    else if (timeAfter < 10){
-      m_frontleft.set(0);
-      m_backleft.set(0);
-      m_frontright.set(0);
-      m_backright.set(0);
+    else if (timeAfter < 9) {
+      sillydrive.manual_drive(0, 0);
+    }
+    else if (timeAfter < 11){
       Shooter.manual_shoot(0.5);
         }
    else {
         Shooter.manual_shoot(0);
         }
+    //Test telem
+    SmartDashboard.putNumber("TimeAfter", timeAfter);
     }
   
 
@@ -120,40 +84,27 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    DifferentialDriveWheelSpeeds var_wheelspeeds; //wheel speeds from kinematics
-
-    //break check
-    var_driver_left_shoulder = ctrl_driver.getLeftBumperButton();
-
-    //axis transformations, consume and perform kinematics math using transformed axis data
-    var_xaxis = -MathUtil.applyDeadband(ctrl_driver.getLeftY(), cnst_ctrldeadband) * MathUtil.clamp((var_throttle*var_throttle), 0.4, 1); //use throttle to limit speed for finer control
-    var_zaxis = -MathUtil.applyDeadband(ctrl_driver.getLeftX(), cnst_ctrldeadband);
-    var_throttle = 1 - MathUtil.applyDeadband(ctrl_driver.getRightTriggerAxis(), cnst_ctrldeadband); //subtract axis data from axis maximum to invert scale of axis
-    var_wheelspeeds = obj_kinematics.toWheelSpeeds(new ChassisSpeeds(var_xaxis , 0, var_zaxis));
 
     //bools for shooter operations
     var_driver_a = ctrl_driver.getAButton();
     var_driver_b = ctrl_driver.getBButton();
 
-
-
-    //write speeds to motors for drive
-    if (var_driver_left_shoulder == false) {
-    m_frontleft.set(-var_wheelspeeds.leftMetersPerSecond);
-    m_backleft.set(-var_wheelspeeds.leftMetersPerSecond);
-    m_frontright.set(var_wheelspeeds.rightMetersPerSecond);
-    m_backright.set(var_wheelspeeds.rightMetersPerSecond);
-    }
-    else if (var_driver_left_shoulder == true) {
-      m_frontleft.set(0);
-      m_backleft.set(0);
-      m_frontright.set(0);
-      m_backright.set(0);
-    }
     //shooter n stuff
     var_driver_a = ctrl_driver.getAButton();
     var_driver_b = ctrl_driver.getBButton();
     Shooter.shoot(var_driver_a, var_driver_b);
+
+    //driver data assignment
+    var_driver_a = ctrl_driver.getAButton();
+    var_driver_b = ctrl_driver.getBButton();
+    var_driver_x_axis = ctrl_driver.getLeftX();
+    var_driver_y_axis = ctrl_driver.getLeftY();
+    var_driver_left_bumper = ctrl_driver.getLeftBumperButton();
+    var_driver_right_trigger = ctrl_driver.getRightTriggerAxis();
+
+    //driver n stuff
+    sillydrive.drive(var_driver_y_axis, var_driver_x_axis, var_driver_right_trigger,
+    var_driver_left_bumper);
   }
 
   @Override
