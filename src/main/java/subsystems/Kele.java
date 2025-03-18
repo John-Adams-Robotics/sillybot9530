@@ -20,7 +20,7 @@ public class Kele extends SubsystemBase {
   public  double var_shootspeed;
 
   // THIS IS THE SPEED THAT THE SHOOTER GOES AT
-  final public double speed = 0.5;
+  final public double speed = 0.15;
 
   public Kele() {}
 

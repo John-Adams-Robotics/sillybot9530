@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import subsystems.Kele;
 import subsystems.Drive;
 
+
+
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
  * the TimedRobot documentation. If you change the name of this class or the package after creating
@@ -60,8 +62,8 @@ double time;
 
   @Override
   public void autonomousPeriodic() {
-    time = Timer.getFPGATimestamp();
-    double timeAfter = time - startTime; // FIX THIS LATER
+   /* time = Timer.getFPGATimestamp();
+    double timeAfter = time - startTime;
     if (timeAfter < 8) {
       sillydrive.manual_drive(0.2, 0.2);
     }
@@ -75,7 +77,8 @@ double time;
         Shooter.manual_shoot(0);
         }
     //Test telem
-    SmartDashboard.putNumber("TimeAfter", timeAfter);
+    SmartDashboard.putNumber("TimeAfter", timeAfter); */
+    //driveForwardTime(sillydrive);
     }
   
 
