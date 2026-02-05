@@ -35,6 +35,7 @@ private double var_driver_x_axis; // right stick x axis
 private double var_driver_y_axis; // right stick y axis
 private boolean var_driver_left_bumper; // left bumper
 private double var_driver_right_trigger; //right trigger
+private double gay;
 
 // variables for time
 public double startTime;
